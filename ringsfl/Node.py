@@ -1,4 +1,7 @@
 
+import sys
+sys.path.append("..")
+import logging
 from typing import List
 
 import torch
@@ -8,18 +11,25 @@ import torch.distributed.autograd as dist_autograd
 from torch.distributed import rpc
 from torch.distributed.optim import DistributedOptimizer
 
-from Model import *
-from Dataset import *
+from model.MLP import *
+from model.VGG16 import *
+from model.ResNet18 import *
+from data.MNIST import *
+from data.Cifar10 import *
+
+DATASET_PATH = "~/DistRingSFL/datasets"
 
 class Node:
     def __init__(self,
         model_type:str,                     # specify model structure
         dataset_name:str,                   # specify dataset used for training
         dataset_type:str,                   # iid or noniid
-        prop_len:int,                       # propagation length
+        dataset_blocknum:int,               # how many blocks to divide the dataset into
         lr:float,                           # learning rate
+        batch_size:int,                     # batch size
+        local_epoch:int,                    # local epoch num
+        prop_len:int,                       # propagation length
         aggreg_weight:float,                # aggregation weight
-        local_epoch:int                     # local epoch num
     ) -> None:
         self.__prop_len = prop_len
         self.__lr = lr * aggreg_weight
@@ -29,15 +39,25 @@ class Node:
 
         self.__loss_fn = torch.nn.CrossEntropyLoss()
         if model_type == "mlp":
-            self.__model = MLP()
+            self.__model = MLP_Mnist()
+        elif model_type == "vgg16":
+            self.__model = VGG16_Cifar()
+        elif model_type == "resnet18":
+            self.__model = ResNet18_Cifar()
         else:
             raise ValueError(f"Unrecognized model type: `{model_type}`")
         
         if dataset_name == "mnist":
             self.__trainloader = MNIST(
-                "~/RingSFL/datasets", torchvision.transforms.ToTensor(), 6, 64
+                DATASET_PATH, torchvision.transforms.ToTensor(), dataset_blocknum, batch_size
             ).get_iid_loader(dist.get_rank()-1) if dataset_type == "iid" else MNIST(
-                "~/RingSFL/datasets", torchvision.transforms.ToTensor(), 6, 64
+                DATASET_PATH, torchvision.transforms.ToTensor(), dataset_blocknum, batch_size
+            ).get_noniid_loader(dist.get_rank()-1)
+        elif dataset_name == "cifar10":
+            self.__trainloader = Cifar10(
+                DATASET_PATH, torchvision.transforms.ToTensor(), dataset_blocknum, batch_size
+            ).get_iid_loader(dist.get_rank()-1) if dataset_type == "iid" else Cifar10(
+                DATASET_PATH, torchvision.transforms.ToTensor(), dataset_blocknum, batch_size
             ).get_noniid_loader(dist.get_rank()-1)
         else:
             raise ValueError(f"Unrecognized dataset name: `{dataset_name}`")
@@ -52,7 +72,7 @@ class Node:
     ) -> dict:                              # state dict of local model
         self.__model.load_state_dict(global_model)
         for epoch in range(self.__local_epoch):
-            print(f"Epoch: {epoch}")
+            logging.info(f"Epoch: {epoch:3n}")
             for data, label in self.__trainloader:
                 with dist_autograd.context() as context_id:
                     self.__label_cache = label

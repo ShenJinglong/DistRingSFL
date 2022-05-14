@@ -1,0 +1,28 @@
+
+alg:
+  desc: algorithm (fl or ringsfl)
+  value: !!str fl
+model_type:
+  desc: Model structure
+  value: !!str mlp # mlp or vgg16 or resnet18
+dataset_name:
+  desc: Dataset for training
+  value: !!str mnist # mnist or cifar10
+dataset_type:
+  desc: IID or Non-IID
+  value: !!str iid
+dataset_blocknum:
+  desc: How many blocks to divide the dataset into
+  value: !!int 6
+local_epoch:
+  desc: Local iteration num of each node
+  value: !!int 2
+global_round:
+  desc: Global round num of system
+  value: !!int 5
+learning_rate:
+  desc: Learning rate
+  value: !!float 0.05
+batch_size:
+  desc: Batch size
+  value: !!int 64
