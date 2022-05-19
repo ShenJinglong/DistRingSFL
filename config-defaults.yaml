@@ -1,7 +1,7 @@
 
 alg:
   desc: algorithm (fl or ringsfl)
-  value: !!str fl
+  value: !!str ringsfl
 model_type:
   desc: Model structure
   value: !!str mlp # mlp or vgg16 or resnet18
