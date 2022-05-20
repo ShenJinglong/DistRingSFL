@@ -8,6 +8,8 @@
 # ifconfig mesh0 up
 # ifconfig mesh0 10.0.0.1 netmask 255.255.255.0
 
+systemctl stop NetworkManager
+iw reg set CN
 ip link set wlx0013ef4f0fdf down
 iw dev wlx0013ef4f0fdf interface add ibss0 type ibss
 ip link set up mtu 1532 dev ibss0
