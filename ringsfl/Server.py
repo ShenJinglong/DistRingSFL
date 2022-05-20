@@ -4,6 +4,7 @@ sys.path.append("..")
 import collections
 import logging
 import wandb
+import time
 
 import torchvision
 import torch.distributed as dist
@@ -73,6 +74,7 @@ class Server:
         [node_rref.rpc_sync().start_init() for node_rref in self.__nodes_rref]
 
     def train(self) -> None:
+        start_time = time.time()
         for round in range(self.__comm_round):
             # Local training
             local_models = [node_rref.rpc_async().train(self.__global_model.state_dict()) for node_rref in self.__nodes_rref]
@@ -98,4 +100,10 @@ class Server:
                     total += labels.size(0)
                     correct += (predicted == labels).sum().item()
             acc = 100 * correct / total
-            logging.info(f"Round {round:3n}: acc - {acc:.4f}%")
+            time_cost = time.time() - start_time
+            wandb.log({
+                'round': round,
+                'acc': acc,
+                'time': time_cost
+            })
+            logging.info(f"Round {round:3n}: acc - {acc:.4f}% | time cost - {time_cost:.4f}")

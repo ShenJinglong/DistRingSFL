@@ -3,6 +3,7 @@ import sys
 sys.path.append("..")
 import logging
 from typing import List
+import time
 
 import torch
 import torchvision
@@ -62,10 +63,12 @@ class Node:
         for epoch in range(self.__local_epoch):
             logging.info(f"Epoch: {epoch:3n}")
             for inputs, labels in self.__trainloader:
+                start_time = time.time()
                 self.__optim.zero_grad()
                 outputs = self.__model(inputs)
                 loss = self.__loss_fn(outputs, labels)
-                print(f"loss: {loss.item():.4f}")
+                logging.info(f"loss: {loss.item():.4f}")
                 loss.backward()
                 self.__optim.step()
+                logging.info(f"time cost: {time.time() - start_time}")
         return self.__model.state_dict()

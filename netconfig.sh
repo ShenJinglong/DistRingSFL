@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # ip link set wlan1 down
 # iw dev wlan1 interface add mesh0 type mp
 # ifconfig -a | grep mesh0

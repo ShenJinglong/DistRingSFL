@@ -1,5 +1,6 @@
 
 import sys
+import time
 sys.path.append("..")
 import logging
 from typing import List
@@ -87,7 +88,9 @@ class Node:
         x:torch.Tensor                      # a batch of input data sample
     ) -> None:
         start, stop = 0, self.__prop_len
+        start_time = time.time()
         output = self.__model(x, start=start, stop=stop)
+        logging.info(f"time cost: {time.time() - start_time}")
         if stop < self.__model.block_num:
             self.__next_node.rpc_sync().relay_forward(context_id, output, stop)
         elif stop == self.__model.block_num:
@@ -103,7 +106,9 @@ class Node:
         stop = start + self.__prop_len
         if stop > self.__model.block_num:
             raise ValueError("Stop layer output of model scope.")
+        start_time = time.time()
         output = self.__model(x, start=start, stop=stop)
+        logging.info(f"time cost: {time.time() - start_time}")
         if stop == self.__model.block_num:
             self.__next_node.rpc_sync().stop_forward(context_id, output)
         else:
@@ -114,7 +119,7 @@ class Node:
         x:torch.Tensor                      # model output
     ) -> None:
         loss = self.__loss_fn(x, self.__label_cache)
-        print(f"loss: {loss.item():.4f}")
+        logging.info(f"loss: {loss.item():.4f}")
         rpc.RRef(loss).backward(context_id)
 
     def start_init(self) -> None:
