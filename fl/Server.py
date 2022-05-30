@@ -1,19 +1,15 @@
 
 import sys
 sys.path.append("..")
-import collections
 import logging
 import wandb
 import time
 
-import torchvision
 import torch.distributed as dist
 from torch.distributed import rpc
 
 from fl.Node import Node
-from model.MLP import *
-from model.VGG16 import *
-from model.ResNet18 import *
+from utils.model_utils import eval_model, aggregate_model, construct_model
 from data.MNIST import *
 from data.Cifar10 import *
 
@@ -32,34 +28,30 @@ class Server:
     ) -> None:
         self.__comm_round = comm_round
         self.__world_size = dist.get_world_size()
-
-        if model_type == "mlp":
-            self.__global_model = MLP_Mnist()
-        elif model_type == "vgg16":
-            self.__global_model = VGG16_Cifar()
-        elif model_type == "resnet18":
-            self.__global_model = ResNet18_Cifar()
-        else:
-            raise ValueError(f"Unrecognized model type: `{model_type}`")
+        self.__global_model = construct_model(model_type)
         
         if dataset_name == "mnist":
-            self.__testloader = MNIST(
-                DATASET_PATH, torchvision.transforms.ToTensor(), dataset_blocknum, batch_size
-            ).get_test_loader()
+            dataset_manager = MNIST(DATASET_PATH, dataset_blocknum, batch_size)
         elif dataset_name == "cifar10":
-            self.__testloader = Cifar10(
-                DATASET_PATH, torchvision.transforms.ToTensor(), dataset_blocknum, batch_size
-            ).get_test_loader()
+            dataset_manager = Cifar10(DATASET_PATH, dataset_blocknum, batch_size)
         else:
             raise ValueError(f"Unrecognized dataset name: `{dataset_name}`")
+        self.__testloader = dataset_manager.get_test_loader()
 
         self.__nodes_rref = [
             rpc.remote(
                 f"node{i}",
                 Node,
-                args=(model_type, dataset_name, dataset_type, dataset_blocknum, lr, batch_size, local_epoch)
+                args=(model_type, lr, local_epoch)
             ) for i in range(1, self.__world_size)
         ]
+        
+        if dataset_type == "iid":
+            [node_rref.rpc_sync().set_trainloader(dataset_manager.get_iid_loader(i)) for i, node_rref in enumerate(self.__nodes_rref)]
+        elif dataset_type == "noniid":
+            [node_rref.rpc_sync().set_trainloader(dataset_manager.get_noniid_loader(i)) for i, node_rref in enumerate(self.__nodes_rref)]
+        else:
+            raise ValueError(f"Unrecognized dataset type: `{dataset_type}`")
 
     def train(self) -> None:
         start_time = time.time()
@@ -69,25 +61,10 @@ class Server:
             local_models = [local_model.wait() for local_model in local_models]
 
             # Aggregation
-            weight_keys = list(self.__global_model.state_dict().keys())
-            global_dict = collections.OrderedDict()
-            for key in weight_keys:
-                key_sum = 0
-                for i in range(len(local_models)):
-                    key_sum += local_models[i][key]
-                global_dict[key] = key_sum / len(local_models)
-            self.__global_model.load_state_dict(global_dict)
+            self.__global_model.load_state_dict(aggregate_model(local_models, [1 / len(local_models)] * len(local_models)))
 
             # Testing
-            correct, total = 0, 0
-            self.__global_model.eval()
-            with torch.no_grad():
-                for inputs, labels in self.__testloader:
-                    outputs = self.__global_model(inputs)
-                    _, predicted = torch.max(outputs.data, 1)
-                    total += labels.size(0)
-                    correct += (predicted == labels).sum().item()
-            acc = 100 * correct / total
+            acc = eval_model(self.__global_model, self.__testloader)
             time_cost = time.time() - start_time
             wandb.log({
                 'round': round,

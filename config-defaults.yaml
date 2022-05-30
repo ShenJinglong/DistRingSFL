@@ -4,22 +4,22 @@ alg:
   value: !!str ringsfl
 model_type:
   desc: Model structure
-  value: !!str resnet18 # mlp or vgg16 or resnet18
+  value: !!str cnn # mlp or vgg16 or resnet18 or cnn or mobilenet or mobilenet_simple
 dataset_name:
   desc: Dataset for training
-  value: !!str cifar10 # mnist or cifar10
+  value: !!str mnist # mnist or cifar10
 dataset_type:
   desc: IID or Non-IID
   value: !!str iid
 dataset_blocknum:
   desc: How many blocks to divide the dataset into
-  value: !!int 6
+  value: !!int 12
 local_epoch:
   desc: Local iteration num of each node
-  value: !!int 2
+  value: !!int 1
 global_round:
   desc: Global round num of system
-  value: !!int 5
+  value: !!int 10
 learning_rate:
   desc: Learning rate
   value: !!float 0.05

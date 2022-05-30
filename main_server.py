@@ -1,9 +1,16 @@
 
 import os
+# os.environ['OMP_NUM_THREADS'] = '1'
+# os.environ['OPENBLAS_NUM_THREADS'] = '1'
+# os.environ['MKL_NUM_THREADS'] = '1'
+# os.environ['VECLIB_MAXIMUM_THREADS'] = '1'
+# os.environ['NUMEXPR_NUM_THREADS'] = '1'
 import argparse
 import logging
 import wandb
 
+import torch
+torch.set_num_threads(1)
 from torch.distributed import rpc
 from torch.distributed import init_process_group
 
@@ -20,10 +27,14 @@ wandb.init(
 )
 config = wandb.config
 
-MASTER_ADDR = "10.0.0.1"
+# MASTER_ADDR = "10.0.0.1"
+# MASTER_PORT = "23333"
+# GLOO_SOCKET_IFNAME = "bat0"
+# TP_SOCKET_IFNAME = "bat0"
+MASTER_ADDR = "127.0.0.1"
 MASTER_PORT = "23333"
-GLOO_SOCKET_IFNAME = "bat0"
-TP_SOCKET_IFNAME = "bat0"
+GLOO_SOCKET_IFNAME = "lo"
+TP_SOCKET_IFNAME = "lo"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("rank", type=int)
