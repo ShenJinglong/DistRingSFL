@@ -2,7 +2,6 @@
 import sys
 sys.path.append("..")
 import logging
-# import wandb
 from typing import List
 
 import torch
@@ -12,10 +11,6 @@ from torch.distributed import rpc
 from torch.distributed.optim import DistributedOptimizer
 
 from utils.model_utils import construct_model
-from data.MNIST import *
-from data.Cifar10 import *
-
-DATASET_PATH = "~/DistRingSFL/datasets"
 
 class Node:
     def __init__(self,
@@ -57,7 +52,6 @@ class Node:
                     self.start_forward(context_id, data)
                     dist.barrier(self.__node_group)
                     self.__dist_optim.step(context_id)
-                    
                     dist.barrier(self.__node_group)
         return self.__model.state_dict()
 
@@ -94,7 +88,6 @@ class Node:
     ) -> None:
         loss = self.__loss_fn(x, self.__label_cache)
         logging.info(f"loss: {loss.item():.4f}")
-        # wandb.log({f"{rpc.get_worker_info().name} loss": loss.item()})
         rpc.RRef(loss).backward(context_id)
 
     def start_init(self) -> None:

@@ -1,2 +1,2 @@
 
-__all__ = ["MLP", "VGG16", "ResNet18"]
+__all__ = ["CNN", "MLP", "MobileNet", "ModelBase", "VGG16", "ResNet18"]

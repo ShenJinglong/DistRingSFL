@@ -1,6 +1,9 @@
 
+import sys
+sys.path.append("..")
 import torch
-from torch.distributed import rpc
+
+from model.ModelBase import ModelBase
 
 class BasicBlock(torch.nn.Module):
     expansion = 1
@@ -39,12 +42,12 @@ class BasicBlock(torch.nn.Module):
         return out
 
 
-class ResNet18_Cifar(torch.nn.Module):
+class ResNet18_Cifar(ModelBase):
     def __init__(self,
         n_classes: int = 10
     ) -> None:
         super().__init__()
-        self.__blocks = torch.nn.ModuleList([
+        self._blocks = torch.nn.ModuleList([
             torch.nn.Sequential(
                 torch.nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False),
                 torch.nn.BatchNorm2d(64),
@@ -64,20 +67,8 @@ class ResNet18_Cifar(torch.nn.Module):
                 torch.nn.Linear(512, n_classes),
             ),                              # 10
         ])
-        self.block_num = len(self.__blocks)
+        self.block_num = len(self._blocks)
         self.__initialize_weights()
-
-
-    def forward(self, x, start=0, stop=10):
-        for block in self.__blocks[start:stop]:
-            x = block(x)
-        return x
-
-    def get_params(self, start=0, stop=10):
-        return [param for param in self.__blocks[start:stop].parameters()]
-
-    def get_rrefs(self, start=0, stop=10):
-        return [rpc.RRef(param) for param in self.__blocks[start:stop].parameters()]
 
     def __initialize_weights(self):
         for m in self.modules():

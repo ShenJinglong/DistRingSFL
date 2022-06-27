@@ -6,8 +6,6 @@ import time
 import torch
 
 from utils.model_utils import construct_model
-from data.MNIST import *
-from data.Cifar10 import *
 
 class Node:
     def __init__(self,

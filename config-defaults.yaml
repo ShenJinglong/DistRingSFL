@@ -1,6 +1,6 @@
 
 alg:
-  desc: algorithm (fl or ringsfl)
+  desc: algorithm (fl or ringsfl or sl or splitfed)
   value: !!str ringsfl
 model_type:
   desc: Model structure
@@ -13,16 +13,18 @@ dataset_type:
   value: !!str iid
 dataset_blocknum:
   desc: How many blocks to divide the dataset into
-  value: !!int 12
+  value: !!int 5
 local_epoch:
   desc: Local iteration num of each node
-  value: !!int 1
+  value: !!int 2
 global_round:
   desc: Global round num of system
-  value: !!int 10
+  value: !!int 100
 learning_rate:
   desc: Learning rate
   value: !!float 0.05
 batch_size:
   desc: Batch size
   value: !!int 64
+cut_point:
+  value: !!int 2

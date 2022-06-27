@@ -7,7 +7,6 @@ import os
 # os.environ['NUMEXPR_NUM_THREADS'] = '1'
 import argparse
 import logging
-# import wandb
 
 import torch
 torch.set_num_threads(1)
@@ -15,25 +14,23 @@ from torch.distributed import rpc
 from torch.distributed import init_process_group
 
 from fl.Node import Node as FL_Node
-from ringsfl import Node as RingSFL_Node
+from ringsfl.Node import Node as RingSFL_Node
+from sl.Node import Node as SL_Node
+from splitfed.Node import Node as SplitFed_Node
 
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
-# wandb.init(
-#     project="DistRingSFL",
-#     entity="sjinglong"
-# )
 
-MASTER_ADDR = "10.0.0.1"
-MASTER_PORT = "23333"
-GLOO_SOCKET_IFNAME = "bat0"
-TP_SOCKET_IFNAME = "bat0"
-# MASTER_ADDR = "127.0.0.1"
+# MASTER_ADDR = "10.0.0.1"
 # MASTER_PORT = "23333"
-# GLOO_SOCKET_IFNAME = "lo"
-# TP_SOCKET_IFNAME = "lo"
+# GLOO_SOCKET_IFNAME = "bat0"
+# TP_SOCKET_IFNAME = "bat0"
+MASTER_ADDR = "127.0.0.1"
+MASTER_PORT = "23333"
+GLOO_SOCKET_IFNAME = "lo"
+TP_SOCKET_IFNAME = "lo"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("rank", type=int)

@@ -10,10 +10,7 @@ from torch.distributed import rpc
 
 from ringsfl.Node import Node
 from utils.model_utils import eval_model, aggregate_model, construct_model
-from data.MNIST import *
-from data.Cifar10 import *
-
-DATASET_PATH = "~/DistRingSFL/datasets"
+from utils.data_utils import DatasetManager
 
 class Server:
     def __init__(self,
@@ -33,14 +30,6 @@ class Server:
         self.__world_size = dist.get_world_size()
         self.__global_model = construct_model(model_type)
 
-        if dataset_name == "mnist":
-            dataset_manager = MNIST(DATASET_PATH, dataset_blocknum, batch_size)
-        elif dataset_name == "cifar10":
-            dataset_manager = Cifar10(DATASET_PATH, dataset_blocknum, batch_size)
-        else:
-            raise ValueError(f"Unrecognized dataset name: `{dataset_name}`")
-        self.__testloader = dataset_manager.get_test_loader()
-
         # Creating training nodes ...
         self.__nodes_rref = [
             rpc.remote(
@@ -52,12 +41,14 @@ class Server:
         dist.new_group(range(1, self.__world_size))
 
         # Setting dataset
+        dataset_manager = DatasetManager(dataset_name, "~/DistRingSFL/datasets", dataset_blocknum, batch_size)
         if dataset_type == "iid":
             [node_rref.rpc_sync().set_trainloader(dataset_manager.get_iid_loader(i)) for i, node_rref in enumerate(self.__nodes_rref)]
         elif dataset_type == "noniid":
             [node_rref.rpc_sync().set_trainloader(dataset_manager.get_noniid_loader(i)) for i, node_rref in enumerate(self.__nodes_rref)]
         else:
             raise ValueError(f"Unrecognized dataset type: `{dataset_type}`")
+        self.__testloader = dataset_manager.get_test_loader()
 
         # Setting communication topology
         [node_rref.rpc_sync().set_next_node(

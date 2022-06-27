@@ -12,7 +12,10 @@ from model.ResNet18 import *
 from model.CNN import *
 from model.MobileNet import *
 
-def aggregate_model(models: List[dict], weights: List[float]) -> dict:
+def aggregate_model(
+    models: List[dict],
+    weights: List[float]
+) -> dict:
     global_dict = collections.OrderedDict()
     param_keys = models[0].keys()
     for key in param_keys:
@@ -22,7 +25,10 @@ def aggregate_model(models: List[dict], weights: List[float]) -> dict:
         global_dict[key] = sum
     return global_dict
 
-def eval_model(model: torch.nn.Module, testloader: torch.utils.data.DataLoader) -> float:
+def eval_model(
+    model: torch.nn.Module,
+    testloader: torch.utils.data.DataLoader
+) -> float:
     model.eval()
     device = next(model.parameters()).device
     total, correct = 0, 0
@@ -35,6 +41,27 @@ def eval_model(model: torch.nn.Module, testloader: torch.utils.data.DataLoader) 
             total += labels.size(0)
             correct += (pred == labels).sum().item()
     model.train()
+    return 100 * correct / total
+
+def eval_splited_model(
+    shallow_model: torch.nn.Module,
+    deep_model: torch.nn.Module,
+    testloader: torch.utils.data.DataLoader
+) -> float:
+    shallow_model.eval()
+    deep_model.eval()
+    device = next(shallow_model.parameters()).device
+    total, correct = 0, 0
+    with torch.no_grad():
+        for inputs, labels in testloader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            fm = shallow_model(inputs)
+            outputs = deep_model(fm)
+            _, pred = outputs.max(1)
+            total += labels.size(0)
+            correct += (pred == labels).sum().item()
+    shallow_model.train()
+    deep_model.train()
     return 100 * correct / total
 
 def construct_model(

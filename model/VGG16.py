@@ -1,11 +1,14 @@
 
+import sys
+sys.path.append("..")
 import torch
-from torch.distributed import rpc
 
-class VGG16_Cifar(torch.nn.Module):
+from model.ModelBase import ModelBase
+
+class VGG16_Cifar(ModelBase):
     def __init__(self) -> None:
         super().__init__()
-        self.__blocks = torch.nn.ModuleList([
+        self._blocks = torch.nn.ModuleList([
             torch.nn.Sequential(
                 torch.nn.Conv2d(in_channels=3, out_channels=64, padding=1, kernel_size=3, stride=1),
                 torch.nn.BatchNorm2d(64),
@@ -92,13 +95,8 @@ class VGG16_Cifar(torch.nn.Module):
                 torch.nn.Linear(in_features=4096, out_features=10)
             )  # 16
         ])
-        self.block_num = len(self.__blocks)
+        self.block_num = len(self._blocks)
         self.__initialize_weights()
-
-    def forward(self, x, start=0, stop=16):
-        for block in self.__blocks[start:stop]:
-            x = block(x)
-        return x
 
     def __initialize_weights(self):
         for m in self.modules():
@@ -112,10 +110,3 @@ class VGG16_Cifar(torch.nn.Module):
             elif isinstance(m, torch.nn.Linear):
                 torch.nn.init.normal_(m.weight, 0, 0.01)
                 torch.nn.init.constant_(m.bias, 0)
-
-
-    def get_params(self, start=0, stop=16):
-        return [param for param in self.__blocks[start:stop].parameters()]
-
-    def get_rrefs(self, start=0, stop=16):
-        return [rpc.RRef(param) for param in self.__blocks[start:stop].parameters()]

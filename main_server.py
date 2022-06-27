@@ -16,6 +16,8 @@ from torch.distributed import init_process_group
 
 from fl.Server import Server as FL_Server
 from ringsfl.Server import Server as RingSFL_Server
+from sl.Server import Server as SL_Server
+from splitfed.Server import Server as SplitFed_Server
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -27,14 +29,14 @@ wandb.init(
 )
 config = wandb.config
 
-MASTER_ADDR = "10.0.0.1"
-MASTER_PORT = "23333"
-GLOO_SOCKET_IFNAME = "bat0"
-TP_SOCKET_IFNAME = "bat0"
-# MASTER_ADDR = "127.0.0.1"
+# MASTER_ADDR = "10.0.0.1"
 # MASTER_PORT = "23333"
-# GLOO_SOCKET_IFNAME = "lo"
-# TP_SOCKET_IFNAME = "lo"
+# GLOO_SOCKET_IFNAME = "bat0"
+# TP_SOCKET_IFNAME = "bat0"
+MASTER_ADDR = "127.0.0.1"
+MASTER_PORT = "23333"
+GLOO_SOCKET_IFNAME = "lo"
+TP_SOCKET_IFNAME = "lo"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("rank", type=int)
@@ -94,6 +96,30 @@ if __name__ == "__main__":
             config.batch_size,
             config.local_epoch,
             config.global_round
+        )
+    elif config.alg == "sl":
+        server = SL_Server(
+            config.model_type,
+            config.dataset_name,
+            config.dataset_type,
+            config.dataset_blocknum,
+            config.learning_rate,
+            config.batch_size,
+            config.local_epoch,
+            config.global_round,
+            config.cut_point
+        )
+    elif config.alg == "splitfed":
+        server = SplitFed_Server(
+            config.model_type,
+            config.dataset_name,
+            config.dataset_type,
+            config.dataset_blocknum,
+            config.learning_rate,
+            config.batch_size,
+            config.local_epoch,
+            config.global_round,
+            config.cut_point
         )
     server.train()
 
