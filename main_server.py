@@ -29,14 +29,14 @@ wandb.init(
 )
 config = wandb.config
 
-# MASTER_ADDR = "10.0.0.1"
-# MASTER_PORT = "23333"
-# GLOO_SOCKET_IFNAME = "bat0"
-# TP_SOCKET_IFNAME = "bat0"
-MASTER_ADDR = "127.0.0.1"
+MASTER_ADDR = "10.0.0.1"
 MASTER_PORT = "23333"
-GLOO_SOCKET_IFNAME = "lo"
-TP_SOCKET_IFNAME = "lo"
+GLOO_SOCKET_IFNAME = "bat0"
+TP_SOCKET_IFNAME = "bat0"
+# MASTER_ADDR = "127.0.0.1"
+# MASTER_PORT = "23333"
+# GLOO_SOCKET_IFNAME = "lo"
+# TP_SOCKET_IFNAME = "lo"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("rank", type=int)
