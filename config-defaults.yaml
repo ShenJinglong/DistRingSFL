@@ -1,7 +1,7 @@
 
 alg:
   desc: algorithm (fl or ringsfl or sl or splitfed)
-  value: !!str ringsfl
+  value: !!str sl
 model_type:
   desc: Model structure
   value: !!str resnet18 # mlp or vgg16 or resnet18 or cnn or mobilenet or mobilenet_simple
@@ -16,7 +16,7 @@ dataset_blocknum:
   value: !!int 781
 local_epoch:
   desc: Local iteration num of each node
-  value: !!int 2
+  value: !!int 5
 global_round:
   desc: Global round num of system
   value: !!int 6

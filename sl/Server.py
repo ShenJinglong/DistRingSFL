@@ -93,6 +93,6 @@ class Server:
         logging.info("training ...")
         self.__start_time = time.time()
         self.__round_counter = 0
-        self.__nodes_rref[0].rpc_async().train(self.__client_global_model.state_dict(), 0, self.__comm_round*self.__local_epoch*self.__batch_num)
+        self.__nodes_rref[0].rpc_async().train(self.__client_global_model.state_dict(), 0, self.__local_epoch*self.__batch_num)
         while self.__round_counter != self.__comm_round:
             pass
