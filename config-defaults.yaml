@@ -13,7 +13,7 @@ dataset_type:
   value: !!str iid
 dataset_blocknum:
   desc: How many blocks to divide the dataset into
-  value: !!int 5
+  value: !!int 781
 local_epoch:
   desc: Local iteration num of each node
   value: !!int 2
