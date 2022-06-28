@@ -16,7 +16,7 @@ dataset_blocknum:
   value: !!int 781
 local_epoch:
   desc: Local iteration num of each node
-  value: !!int 1
+  value: !!int 2
 global_round:
   desc: Global round num of system
   value: !!int 6
