@@ -74,15 +74,15 @@ class Server:
         client_model_dict:dict
     ) -> None:
         logging.info("evaling ...")
-        self.__client_global_model.load_state_dict(client_model_dict)
-        acc = eval_splited_model(self.__client_global_model, self.__server_global_model, self.__testloader)
+        # self.__client_global_model.load_state_dict(client_model_dict)
+        # acc = eval_splited_model(self.__client_global_model, self.__server_global_model, self.__testloader)
         time_cost = time.time() - self.__start_time
         wandb.log({
             'round': self.__round_counter,
-            'acc': acc,
+            # 'acc': acc,
             'time': time_cost
         })
-        logging.info(f"Round {self.__round_counter:3n}: acc - {acc:.4f}% | time cost - {time_cost:.4f}")
+        logging.info(f"Round {self.__round_counter:3n}: acc - {1:.4f}% | time cost - {time_cost:.4f}")
         self.__round_counter += 1
         if self.__round_counter != self.__comm_round:
             return True

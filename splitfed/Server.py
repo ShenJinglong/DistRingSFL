@@ -74,12 +74,12 @@ class Server:
             self.__client_global_model.load_state_dict(aggregate_model(local_models, [1 / len(local_models)] * len(local_models)))
 
             # Testing
-            acc = eval_splited_model(self.__client_global_model, self.__server_global_model, self.__testloader)
+            # acc = eval_splited_model(self.__client_global_model, self.__server_global_model, self.__testloader)
             time_cost = time.time() - start_time
             wandb.log({
                 'round': round,
-                'acc': acc,
+                # 'acc': acc,
                 'time': time_cost
             })
-            logging.info(f"Round {round:3n}: acc - {acc:.4f}% | time cost - {time_cost:.4f}")
+            logging.info(f"Round {round:3n}: acc - {1:.4f}% | time cost - {time_cost:.4f}")
 
