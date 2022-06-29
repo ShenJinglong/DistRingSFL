@@ -2,6 +2,7 @@
 import sys
 sys.path.append("..")
 import logging
+import psutil
 import torch
 import torch.distributed as dist
 import torch.distributed.autograd as dist_autograd
@@ -22,6 +23,7 @@ class Node:
         self.__lr = lr
         self.__local_epoch = local_epoch
         self.__model = construct_model(model_type).get_splited_module(cut_point)[0]
+        self.__p = psutil.Process()
         self.__node_group = dist.new_group(range(1, dist.get_world_size()))
 
     def set_trainloader(self,
@@ -43,7 +45,8 @@ class Node:
                     dist.barrier(self.__node_group)
                     self.__dist_optim.step(context_id)
                     dist.barrier(self.__node_group)
-        return self.__model.state_dict()
+                print(self.__p.cpu_times().user, self.__p.cpu_times().system)
+        return (self.__model.state_dict(), self.__p.cpu_times().user, self.__p.cpu_times().system)
 
     def start_init(self) -> None:
         self.__rrefs = [rpc.RRef(param) for param in self.__model.parameters()] + self.__server_rref.rpc_sync().relay_init()

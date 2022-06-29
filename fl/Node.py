@@ -2,6 +2,7 @@
 import sys
 sys.path.append("..")
 import logging
+import psutil
 import time
 import torch
 
@@ -18,6 +19,7 @@ class Node:
         self.__loss_fn = torch.nn.CrossEntropyLoss()
         self.__model = construct_model(model_type)
         self.__optim = torch.optim.SGD(self.__model.parameters(), lr=self.__lr)
+        self.__p = psutil.Process()
 
     def set_trainloader(self,
         trainloader: torch.utils.data.DataLoader
@@ -31,12 +33,13 @@ class Node:
         for epoch in range(self.__local_epoch):
             logging.info(f"Epoch: {epoch:3n}")
             for inputs, labels in self.__trainloader:
-                start_time = time.time()
+                # start_time = time.time()
                 self.__optim.zero_grad()
                 outputs = self.__model(inputs)
                 loss = self.__loss_fn(outputs, labels)
                 logging.info(f"loss: {loss.item():.4f}")
                 loss.backward()
                 self.__optim.step()
-                logging.info(f"time cost: {time.time() - start_time}")
-        return self.__model.state_dict()
+                # logging.info(f"time cost: {time.time() - start_time}")
+                print(self.__p.cpu_times().user, self.__p.cpu_times().system)
+        return (self.__model.state_dict(), self.__p.cpu_times().user, self.__p.cpu_times().system)

@@ -11,6 +11,8 @@ from model.VGG16 import *
 from model.ResNet18 import *
 from model.CNN import *
 from model.MobileNet import *
+from model.AlexNet import *
+from model.LeNet import *
 
 def aggregate_model(
     models: List[dict],
@@ -79,5 +81,9 @@ def construct_model(
         return MobileNet_Mnist()
     elif model_type == "mobilenet_simple":
         return MobileNetSimple_Mnist()
+    elif model_type == "lenet":
+        return LeNet_Mnist()
+    elif model_type == "alexnet":
+        return AlexNet_Mnist()
     else:
         raise ValueError(f"Unrecognized model type: `{model_type}`")

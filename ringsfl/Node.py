@@ -2,7 +2,8 @@
 import sys
 sys.path.append("..")
 import logging
-from typing import List
+import psutil
+from typing import List, Tuple
 
 import torch
 import torch.distributed as dist
@@ -25,6 +26,7 @@ class Node:
         self.__local_epoch = local_epoch
         self.__loss_fn = torch.nn.CrossEntropyLoss()
         self.__model = construct_model(model_type)
+        self.__p = psutil.Process()
         logging.info(f"propagation length: {self.__prop_len}")
         self.__node_group = dist.new_group(range(1, dist.get_world_size()))
 
@@ -41,7 +43,7 @@ class Node:
 
     def train(self,
         global_model:dict                   # state dict of global model
-    ) -> dict:                              # state dict of local model
+    ) -> Tuple[dict, float, float]:                              # state dict of local model
         self.__model.load_state_dict(global_model)
         dist.barrier(self.__node_group)
         for epoch in range(self.__local_epoch):
@@ -53,7 +55,8 @@ class Node:
                     dist.barrier(self.__node_group)
                     self.__dist_optim.step(context_id)
                     dist.barrier(self.__node_group)
-        return self.__model.state_dict()
+                print(self.__p.cpu_times().user, self.__p.cpu_times().system)
+        return (self.__model.state_dict(), self.__p.cpu_times().user, self.__p.cpu_times().system)
 
     def start_forward(self,
         context_id:int,                     # context id for backward propagation

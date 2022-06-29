@@ -67,8 +67,9 @@ class Server:
         start_time = time.time()
         for round in range(self.__comm_round):
             # Local training
-            local_models = [node_rref.rpc_async().train(self.__client_global_model.state_dict()) for node_rref in self.__nodes_rref]
-            local_models = [local_model.wait() for local_model in local_models]
+            local_datas = [node_rref.rpc_async().train(self.__client_global_model.state_dict()) for node_rref in self.__nodes_rref]
+            local_datas = [local_data.wait() for local_data in local_datas]
+            local_models = [local_data[0] for local_data in local_datas]
 
             # Aggregation
             self.__client_global_model.load_state_dict(aggregate_model(local_models, [1 / len(local_models)] * len(local_models)))
@@ -81,5 +82,8 @@ class Server:
                 # 'acc': acc,
                 'time': time_cost
             })
-            logging.info(f"Round {round:3n}: acc - {1:.4f}% | time cost - {time_cost:.4f}")
+            log_msg = f"Round {round:3n}: acc - {1:.4f}% | time cost - {time_cost:.4f} |"
+            for local_data in local_datas:
+                log_msg += f" ({local_data[1]},{local_data[2]})"
+            logging.info(log_msg)
 

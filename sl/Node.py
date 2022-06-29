@@ -2,6 +2,7 @@
 import sys
 sys.path.append("..")
 import logging
+import psutil
 import torch
 import torch.distributed.autograd as dist_autograd
 from torch.distributed import rpc
@@ -19,6 +20,7 @@ class Node:
         self.__server_rref = server_rref
         self.__lr = lr
         self.__model = construct_model(model_type).get_splited_module(cut_point)[0]
+        self.__p = psutil.Process()
 
     def set_next_node(self,
         next_node_rref:rpc.RRef
@@ -58,7 +60,7 @@ class Node:
         else:
             step_counter += 1
             self.__next_node.rpc_async().train(self.__model.state_dict(), step_counter, eval_step)
-
+        print(self.__p.cpu_times().user, self.__p.cpu_times().system)
 
     def start_init(self) -> None:
         self.__rrefs = [rpc.RRef(param) for param in self.__model.parameters()] + self.__server_rref.rpc_sync().relay_init()
