@@ -1,19 +1,19 @@
 
 alg:
   desc: algorithm (fl or ringsfl or sl or splitfed)
-  value: !!str splitfed
+  value: !!str fl
 model_type:
   desc: Model structure
-  value: !!str resnet18 # mlp or vgg16 or resnet18 or cnn or mobilenet or mobilenet_simple or lenet or alexnet
+  value: !!str cnn # mlp or vgg16 or resnet18 or cnn or mobilenet or mobilenet_simple or lenet or alexnet
 dataset_name:
   desc: Dataset for training
-  value: !!str cifar10 # mnist or cifar10
+  value: !!str mnist # mnist or cifar10
 dataset_type:
   desc: IID or Non-IID
   value: !!str iid
 dataset_blocknum:
   desc: How many blocks to divide the dataset into
-  value: !!int 5 # 781
+  value: !!int 30 # 937 # 781
 local_epoch:
   desc: Local iteration num of each node
   value: !!int 2
@@ -22,7 +22,7 @@ global_round:
   value: !!int 6
 learning_rate:
   desc: Learning rate
-  value: !!float 0.1
+  value: !!float 0.05
 batch_size:
   desc: Batch size
   value: !!int 64

@@ -8,7 +8,7 @@ from model.ModelBase import ModelBase
 class CNN_Mnist(ModelBase):
     def __init__(self) -> None:
         super().__init__()
-        self._blocks = torch.nn.ModuleList([
+        self._blocks = torch.nn.ModuleList([ # 14
             torch.nn.Conv2d(in_channels=1, out_channels=32, kernel_size=5, stride=1, padding=2),
             torch.nn.ReLU(inplace=True),
             torch.nn.MaxPool2d(kernel_size=2),
