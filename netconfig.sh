@@ -9,12 +9,30 @@
 # ifconfig mesh0 up
 # ifconfig mesh0 10.0.0.1 netmask 255.255.255.0
 
-systemctl stop NetworkManager
-iw reg set CN
-ip link set wlx0013ef4f0fdf down
-iw dev wlx0013ef4f0fdf interface add ibss0 type ibss
+if [ ${HOSTNAME} == "sjinglong-desktop" ]
+then
+    systemctl stop NetworkManager
+    iw reg set CN
+    interfaceName="wlx0013ef4f0fdf"
+    ipAddress="10.0.0.1"
+elif [ ${HOSTNAME} == "rasp1" ]
+then
+    interfaceName="wlan1"
+    ipAddress="10.0.0.2"
+elif [ ${HOSTNAME} == "rasp2" ]
+then
+    interfaceName="wlan1"
+    ipAddress="10.0.0.3"
+elif [ ${HOSTNAME} == "rasp3" ]
+then
+    interfaceName="wlan1"
+    ipAddress="10.0.0.4"
+fi
+
+ip link set ${interfaceName} down
+iw dev ${interfaceName} interface add ibss0 type ibss
 ip link set up mtu 1532 dev ibss0
 iw dev ibss0 ibss join ringsfl 5220 HT40+ fixed-freq 02:12:34:56:78:9A
 batctl if add ibss0
 batctl if
-ifconfig bat0 10.0.0.1 netmask 255.255.255.0
+ifconfig bat0 ${ipAddress} netmask 255.255.255.0

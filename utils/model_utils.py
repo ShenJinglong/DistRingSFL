@@ -38,7 +38,6 @@ def eval_model(
         for inputs, labels in testloader:
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
-            # print(torch.nn.CrossEntropyLoss()(outputs, labels))
             _, pred = outputs.max(1)
             total += labels.size(0)
             correct += (pred == labels).sum().item()
