@@ -41,5 +41,5 @@ class Node:
                 loss.backward()
                 self.__optim.step()
                 # logging.info(f"time cost: {time.time() - start_time}")
-                print(self.__p.cpu_times().user, self.__p.cpu_times().system)
+                # print(self.__p.cpu_times().user, self.__p.cpu_times().system)
         return (self.__model.state_dict(), self.__p.cpu_times().user, self.__p.cpu_times().system)

@@ -45,7 +45,7 @@ class Node:
                     dist.barrier(self.__node_group)
                     self.__dist_optim.step(context_id)
                     dist.barrier(self.__node_group)
-                print(self.__p.cpu_times().user, self.__p.cpu_times().system)
+                # print(self.__p.cpu_times().user, self.__p.cpu_times().system)
         return (self.__model.state_dict(), self.__p.cpu_times().user, self.__p.cpu_times().system)
 
     def start_init(self) -> None:

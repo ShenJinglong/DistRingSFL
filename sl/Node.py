@@ -60,7 +60,7 @@ class Node:
         else:
             step_counter += 1
             self.__next_node.rpc_async().train(self.__model.state_dict(), step_counter, eval_step)
-        print(self.__p.cpu_times().user, self.__p.cpu_times().system)
+        # print(self.__p.cpu_times().user, self.__p.cpu_times().system)
 
     def start_init(self) -> None:
         self.__rrefs = [rpc.RRef(param) for param in self.__model.parameters()] + self.__server_rref.rpc_sync().relay_init()

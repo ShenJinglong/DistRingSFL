@@ -1,7 +1,7 @@
 
 alg:
   desc: algorithm (fl or ringsfl or sl or splitfed)
-  value: !!str fl
+  value: !!str ringsfl
 model_type:
   desc: Model structure
   value: !!str cnn # mlp or vgg16 or resnet18 or cnn or mobilenet or mobilenet_simple or lenet or alexnet

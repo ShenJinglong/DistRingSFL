@@ -37,7 +37,7 @@ class Server:
         ]
 
         # Setting dataset
-        dataset_manager = DatasetManager(dataset_name, "~/DistRingSFL/datasets", dataset_blocknum, batch_size)
+        dataset_manager = DatasetManager(dataset_name, "~/projects/DistRingSFL/datasets", dataset_blocknum, batch_size)
         if dataset_type == "iid":
             [node_rref.rpc_sync().set_trainloader(dataset_manager.get_iid_loader(i)) for i, node_rref in enumerate(self.__nodes_rref)]
         elif dataset_type == "noniid":

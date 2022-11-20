@@ -12,7 +12,7 @@
 if [ ${HOSTNAME} == "sjinglong-desktop" ]
 then
     systemctl stop NetworkManager
-    iw reg set CN
+    iw reg set CA
     interfaceName="wlx0013ef4f0fdf"
     ipAddress="10.0.0.1"
 elif [ ${HOSTNAME} == "rasp1" ]
